@@ -1,0 +1,32 @@
+pipeline {
+    agent any
+    stages {
+        stage ("git checkout"){
+            steps {
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com/Anilyedururi/devops.git'
+            }
+        }
+        stage("build & push image"){
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-cred', passwordVariable: 'docker_password', usernameVariable: 'docker_use')]) {
+                    sh "docker build -t anil1129/wisecow:${currentBuild.number} ." 
+                    sh "docker login -u ${docker_use} -p ${docker_password}"
+                    sh "docker push anil1129/wisecow:${currentBuild.number}"
+                }
+            }
+        }
+        stage("deploy to kubernetes") {
+            steps {
+                withCredentials([aws(credentialsId: 'aws_k8s')]) {
+                    sh """
+                    aws eks --region ap-south-1 update-kubeconfig --name cow
+                    sed -i 's|image: anil1129/wisecow:.*|image: anil1129/wisecow:${currentBuild.number}|' k8s/deployment.yaml
+                    kubectl apply -f k8s/deployment.yaml
+                    kubectl apply -f k8s/service.yaml
+                    kubectl apply -f k8s/ingress.yaml
+                    """
+                }
+            }
+        }
+    }
+}
