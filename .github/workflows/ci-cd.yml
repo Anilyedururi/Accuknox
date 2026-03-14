@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_NAME: anilyedururi/wisecow
+      IMAGE_NAME: anil1129/wisecow
 
     steps:
 
