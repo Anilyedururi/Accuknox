@@ -4,12 +4,6 @@ on:
   push:
     branches:
       - main
-  workflow_disname: Wisecow CI/CD Pipeline
-
-on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
